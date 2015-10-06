@@ -14,7 +14,6 @@
     "LambdaBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "BucketName": {"Fn::Join": ["-", ["democratree-api-lambda", {"Ref": "AWS::StackId"}]]},
         "VersioningConfiguration": {
           "Status": "Enabled"
         }
