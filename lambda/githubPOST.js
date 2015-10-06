@@ -4,7 +4,7 @@ var sqs = new aws.SQS();
 
 exports.handler = function(event, context) {
 	console.log('received event:', JSON.stringify(event, null, 2));
-  if (event.repository !== undefined && event.action === undefined) {
+  if (event.repository !== undefined && event.pusher !== undefined && event.action === undefined) {
     var message = {
       "action": "create_or_update",
       "repository": {
@@ -25,6 +25,7 @@ exports.handler = function(event, context) {
       }
     });
   } else {
-    context.fail(new Error('I only support push events'));
+    console.log('I only support push events');
+    context.succeed();
   }
 };
