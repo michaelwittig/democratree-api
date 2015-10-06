@@ -1,6 +1,6 @@
 console.log('loading function');
 var aws = require('aws-sdk');
-var sqs = aws.SQS();
+var sqs = new aws.SQS();
 
 exports.handler = function(event, context) {
 	console.log('received event:', JSON.stringify(event, null, 2));
