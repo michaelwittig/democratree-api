@@ -1,7 +1,82 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "democratree API",
+  "Parameters": {
+    "LambdaS3ObjectVersion": {
+      "Type": "String",
+      "Description": "Leave blank to not create the Lambda"
+    }
+  },
+  "Conditions": {
+    "DeployLambda": {"Fn::Equals": [{"Ref" : "LambdaS3ObjectVersion"}, ""]}
+  },
   "Resources": {
+    "LambdaBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "democratree-api-lambda",
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        }
+      }
+    },
+    "LambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "lambda.amazonaws.com"
+            },
+            "Action": ["sts:AssumeRole"]
+          }]
+        },
+        "Path": "/",
+        "Policies": [{
+          "PolicyName": "logs",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": [
+                 "logs:*"
+              ],
+              "Resource": "arn:aws:logs:*:*:*"
+            }]
+          }
+        }, {
+          "PolicyName": "sqs",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Sid": "Stmt1424083772000",
+              "Effect": "Allow",
+              "Action": ["sqs:SendMessage"],
+              "Resource": [{"Fn::GetAtt": ["Queue", "Arn"]}]
+            }]
+          }
+        }]
+      }
+    },
+    "LambdaGitHubPOST": {
+      "Type" : "AWS::Lambda::Function",
+      "Condition": "DeployLambda",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {"Ref": "LambdaBucket"},
+          "S3Key": "lambda.zip",
+          "S3ObjectVersion": {"Ref": "LambdaS3ObjectVersion"}
+        },
+        "Description": "GitHub POST",
+        "Handler": "githubPOST.handler",
+        "MemorySize": 128,
+        "Role": {"Fn::GetAtt": ["LambdaRole", "Arn"]},
+        "Runtime": "nodejs",
+        "Timeout": 10
+      }
+    },
     "AlarmTopic": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
