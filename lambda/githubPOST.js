@@ -8,6 +8,9 @@ exports.handler = function(event, context) {
     "action": "create_or_update",
     "repository": {
       "full_name": event.repository.full_name
+    },
+    "user": {
+      "email": event.pusher.email
     }
   };
   sqs.sendMessage({
