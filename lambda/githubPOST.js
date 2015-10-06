@@ -17,29 +17,27 @@ function send(message, context) {
 
 exports.handler = function(event, context) {
 	console.log('received event:', JSON.stringify(event, null, 2));
-  if (event.ref_type === 'tag') {
-    var message = {
+  if (event.ref_type === 'tag' && event.pusher !== undefined) {
+    send({
       "action": "create_version",
-      "version": event.ref,
+      "version": event.ref.substr(10),
       "repository": {
         "full_name": event.repository.full_name
       },
       "user": {
-        "email": "michael@widdix.de"
+        "email": event.pusher.email
       }
-    }; // TODO add email from API key
-    send(message, context);
+    }, context);
   } else if (event.repository !== undefined && event.pusher !== undefined && event.action === undefined) {
-    var message = {
+    send({
       "action": "create_or_update",
       "repository": {
         "full_name": event.repository.full_name
       },
       "user": {
-        "email": "michael@widdix.de"
+        "email": event.pusher.email
       }
-    }; // TODO add email from API key
-    send(message, context);
+    }, context);
   } else {
     console.log('I only support push events');
     context.succeed();
