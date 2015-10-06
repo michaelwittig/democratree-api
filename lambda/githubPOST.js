@@ -4,23 +4,27 @@ var sqs = new aws.SQS();
 
 exports.handler = function(event, context) {
 	console.log('received event:', JSON.stringify(event, null, 2));
-  var message = {
-    "action": "create_or_update",
-    "repository": {
-      "full_name": event.repository.full_name
-    },
-    "user": {
-      "email": event.pusher.email
-    }
-  };
-  sqs.sendMessage({
-    "MessageBody": JSON.stringify(message),
-    "QueueUrl": "https://sqs.us-east-1.amazonaws.com/089545019273/democratree-worker"
-  }, function(err) {
-    if (err) {
-      context.fail(err);
-    } else {
-      context.succeed();
-    }
-  });
+  if (event.repository !== undefined && event.action === undefined) {
+    var message = {
+      "action": "create_or_update",
+      "repository": {
+        "full_name": event.repository.full_name
+      },
+      "user": {
+        "email": event.pusher.email
+      }
+    };
+    sqs.sendMessage({
+      "MessageBody": JSON.stringify(message),
+      "QueueUrl": "https://sqs.us-east-1.amazonaws.com/089545019273/democratree-worker"
+    }, function(err) {
+      if (err) {
+        context.fail(err);
+      } else {
+        context.succeed();
+      }
+    });
+  } else {
+    context.fail(new Error('I only support push events'));
+  }
 };
