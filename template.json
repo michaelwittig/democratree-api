@@ -8,13 +8,13 @@
     }
   },
   "Conditions": {
-    "DeployLambda": {"Fn::Equals": [{"Ref" : "LambdaS3ObjectVersion"}, ""]}
+    "DeployLambda": {"Fn::Not": [{"Fn::Equals": [{"Ref" : "LambdaS3ObjectVersion"}, ""]}]}
   },
   "Resources": {
     "LambdaBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "BucketName": "democratree-api-lambda",
+        "BucketName": {"Fn::Join": ["-", ["democratree-api-lambda", {"Ref": "AWS::StackId"}]]},
         "VersioningConfiguration": {
           "Status": "Enabled"
         }
