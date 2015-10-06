@@ -1,3 +1,3 @@
 #!/bin/bash
 
-zip -r lambda.zip *.js
+zip -r lambda.zip *.js package.json

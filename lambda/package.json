@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "aws-sdk": "2.1.35"
+  },
+  "bundledDependencies": []
+}
