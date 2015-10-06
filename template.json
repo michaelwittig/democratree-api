@@ -11,6 +11,24 @@
     "DeployLambda": {"Fn::Not": [{"Fn::Equals": [{"Ref" : "LambdaS3ObjectVersion"}, ""]}]}
   },
   "Resources": {
+    "TokenTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [{
+          "AttributeName": "token",
+          "AttributeType": "S"
+        }],
+        "KeySchema": [{
+          "AttributeName": "token",
+          "KeyType": "HASH"
+        }],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "2",
+          "WriteCapacityUnits": "2"
+        },
+        "TableName": "democratree-token"
+      }
+    },
     "LambdaBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
@@ -54,6 +72,17 @@
               "Effect": "Allow",
               "Action": ["sqs:SendMessage"],
               "Resource": [{"Fn::GetAtt": ["Queue", "Arn"]}]
+            }]
+          }
+        }, {
+          "PolicyName": "dynamodb",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Sid": "Stmt1424083772000",
+              "Effect": "Allow",
+              "Action": ["dynamodb:*"],
+              "Resource": "*"
             }]
           }
         }]

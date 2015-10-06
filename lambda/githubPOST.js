@@ -1,6 +1,7 @@
 console.log('loading function');
 var aws = require('aws-sdk');
 var sqs = new aws.SQS();
+var dynamodb = new aws.DynamoDB();
 
 function send(message, context) {
   sqs.sendMessage({
