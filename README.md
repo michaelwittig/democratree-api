@@ -8,3 +8,6 @@ This is part of the democratree app caring about the HTTP(S) API. The API is pro
 2. upload the `lambda.zip`file to S3 bucket called `democratree-api-lambdabucket-*`
 3. grap the new version of the S3 object and update the CloudFormation stack `democratree-api` parameter `LambdaS3ObjectVersion` accordingly
  
+## Other parts
+
+* https://github.com/pouellet/democratree-worker
