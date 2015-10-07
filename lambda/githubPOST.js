@@ -23,40 +23,49 @@ function calcDigest(key, blob) {
   return 'sha1=' + crypto.createHmac('sha1', key).update(blob).digest('hex');
 }
 
+function getHook(hook, cb) {
+  // TODO implement by getting from DynamoDB
+  cb(null, {secret: "test1234", user: {email: "michael@widdix.de"}});
+}
+
 exports.handler = function(event, context) {
   console.log('received event:', JSON.stringify(event)); // TODO debug only
   var body = event.body;
   var header = event.header;
-  var hook = event.hook;
-  var digest = calcDigest("test1234", JSON.stringify(body));
-  if (header['X-Hub-Signature'] !== digest) {
-    //context.fail(new Error("digest wrong"));
-    //return;
-    console.log("digest wrong"); // TODO flip to other implementation
-  }
-  if (header['X-Github-Event'] === 'create' && body.ref_type === 'tag' && body.pusher !== undefined) {
-    send({
-      "action": "create_version",
-      "version": body.ref.substr(10),
-      "repository": {
-        "full_name": body.repository.full_name
-      },
-      "user": {
-        "email": body.pusher.email
+  getHook(event.hook, function(err, hook) {
+    if (err) {
+      context.fail(err);
+    } else {
+      var digest = calcDigest(hook.secret, JSON.stringify(body));
+      if (header['X-Hub-Signature'] === digest) {
+        if (header['X-Github-Event'] === 'create' && body.ref_type === 'tag') {
+          send({
+            "action": "create_version",
+            "version": body.ref,
+            "repository": {
+              "full_name": body.repository.full_name
+            },
+            "user": {
+              "email": hook.user.email
+            }
+          }, context);
+        } else if (header['X-Github-Event'] === 'push' && body.repository !== undefined) {
+          send({
+            "action": "create_or_update",
+            "repository": {
+              "full_name": body.repository.full_name
+            },
+            "user": {
+              "email": hook.user.email
+            }
+          }, context);
+        } else {
+          console.log('I only support certain events, but not:', JSON.stringify(event, null, 2));
+          context.succeed();
+        }
+      } else {
+        context.fail(new Error("digest wrong"));
       }
-    }, context);
-  } else if (header['X-Github-Event'] === 'push' && body.repository !== undefined && body.pusher !== undefined) {
-    send({
-      "action": "create_or_update",
-      "repository": {
-        "full_name": body.repository.full_name
-      },
-      "user": {
-        "email": body.pusher.email
-      }
-    }, context);
-  } else {
-    console.log('I only support certain events, but not:', JSON.stringify(event, null, 2));
-    context.succeed();
-  }
+    }
+  });
 };
