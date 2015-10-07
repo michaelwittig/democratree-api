@@ -11,22 +11,22 @@
     "DeployLambda": {"Fn::Not": [{"Fn::Equals": [{"Ref" : "LambdaS3ObjectVersion"}, ""]}]}
   },
   "Resources": {
-    "TokenTable": {
+    "HookTable": {
       "Type": "AWS::DynamoDB::Table",
       "Properties": {
         "AttributeDefinitions": [{
-          "AttributeName": "token",
+          "AttributeName": "hook",
           "AttributeType": "S"
         }],
         "KeySchema": [{
-          "AttributeName": "token",
+          "AttributeName": "hook",
           "KeyType": "HASH"
         }],
         "ProvisionedThroughput": {
           "ReadCapacityUnits": "2",
           "WriteCapacityUnits": "2"
         },
-        "TableName": "democratree-token"
+        "TableName": "democratree-hook"
       }
     },
     "LambdaBucket": {
