@@ -24,8 +24,24 @@ function calcDigest(key, blob) {
 }
 
 function getHook(hook, cb) {
-  // TODO implement by getting from DynamoDB
-  cb(null, {secret: "test1234", user: {email: "michael@widdix.de"}});
+  dynamodb.getItem({
+    "Key": {
+      "hook": {
+        "S": hook
+      }
+    },
+    "TableName": "democratree-hook"
+  }, function(err, data) {
+    if (err) {
+      cb(err);
+    } else {
+      if (data.Item === undefined) {
+        cb(new Error("hook not found"));
+      } else {
+        cb(null, {secret: data.Item.secret.S, user: {email: data.Item.email.S}});
+      }
+    }
+  });
 }
 
 exports.handler = function(event, context) {
@@ -38,7 +54,7 @@ exports.handler = function(event, context) {
     } else {
       var digest = calcDigest(hook.secret, JSON.stringify(body));
       if (header['X-Hub-Signature'] === digest) {
-        if (header['X-Github-Event'] === 'create' && body.ref_type === 'tag') {
+        if (header['X-Github-Event'] === 'create' && body.ref_type === 'tag' && body.repository !== undefined) {
           send({
             "action": "create_version",
             "version": body.ref,

@@ -81,7 +81,7 @@
             "Statement": [{
               "Sid": "Stmt1424083772000",
               "Effect": "Allow",
-              "Action": ["dynamodb:*"],
+              "Action": ["dynamodb:GetItem"],
               "Resource": "*"
             }]
           }
